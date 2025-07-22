@@ -40,9 +40,9 @@
                     <li class="sidebar-item" data-content="audio-books-content">الكتب الصوتية</li>
                     <li class="sidebar-item" data-content="daily-schedule-content">الجدول اليومي</li>
                     <li class="sidebar-item" data-content="progress-tracking-content">تتبع التقدم</li>
-                    <li class="sidebar-item" data-content="detailed-statistics-content">الإحصائيات التفصيلية</li> <li class="sidebar-item" data-content="gamification-content">الإنجازات والمكافآت</li> <li class="sidebar-item" data-content="quizzes-content">الاختبارات</li>
+                    <li class="sidebar-item" data-content="quizzes-content">الاختبارات</li>
                     <li class="sidebar-item" data-content="notes-content">ملحوظاتي</li>
-                    <li class="sidebar-item" data-content="data-management-content">إدارة البيانات</li> <li class="sidebar-item">المجتمع</li>
+                    <li class="sidebar-item">المجتمع</li>
                 </ul>
             </aside>
 
@@ -183,51 +183,6 @@
                     </div>
                 </div>
 
-                <div id="detailed-statistics-content" class="content-section" style="display: none;">
-                    <div class="card">
-                        <h1>الإحصائيات التفصيلية 📊</h1>
-                        <p style="color: #666; margin-bottom: 20px;">شاهد إحصائيات مفصلة حول تقدمك ونشاطك.</p>
-
-                        <h2>وقت القراءة/الاستماع ⏱️</h2>
-                        <div id="time-spent-stats" style="margin-bottom: 30px;">
-                            <p id="totalReadingTime">إجمالي وقت القراءة: 0 ساعة و 0 دقيقة</p>
-                            <p id="totalListeningTime">إجمالي وقت الاستماع: 0 ساعة و 0 دقيقة</p>
-                        </div>
-
-                        <h2>تقدم الكتب النصية 📚</h2>
-                        <canvas id="textBookProgressChart" width="400" height="200"></canvas>
-                        <p id="noTextBookProgressChart" style="display: none; text-align: center; color: #888; margin-top: 15px;">لا توجد بيانات لعرض تقدم الكتب النصية.</p>
-
-                        <h2>نشاط الاستماع للكتب الصوتية 🎧</h2>
-                        <canvas id="audioBookActivityChart" width="400" height="200"></canvas>
-                        <p id="noAudioBookActivityChart" style="display: none; text-align: center; color: #888; margin-top: 15px;">لا توجد بيانات لعرض نشاط الكتب الصوتية.</p>
-                    </div>
-                </div>
-
-                <div id="gamification-content" class="content-section" style="display: none;">
-                    <div class="card">
-                        <h1>الإنجازات والمكافآت 🏆</h1>
-                        <p style="color: #666; margin-bottom: 20px;">اجمع الشارات واكسب نقاط الخبرة مع تقدمك في التعلم!</p>
-
-                        <div style="text-align: center; margin-bottom: 30px;">
-                            <h2>نقاط الخبرة (XP): <span id="userXp">0</span> ⭐</h2>
-                            <h2>المستوى الحالي: <span id="userLevel">1</span> ⬆️</h2>
-                        </div>
-
-                        <h2>شاراتك 🎖️</h2>
-                        <div id="badges-display" class="badges-grid">
-                            <p id="noBadgesMessage" style="text-align: center; color: #888;">لم تكسب أي شارات بعد. استمر في التعلم!</p>
-                            </div>
-
-                        <h2>الأهداف المقبلة 🎯</h2>
-                        <div id="upcoming-goals">
-                            <p><strong>قارئ مبتدئ:</strong> اقرأ 100 صفحة (حاليًا: <span id="goalReader100">0</span> صفحة)</p>
-                            <p><strong>المستمع النشيط:</strong> استمع لمدة 60 دقيقة (حاليًا: <span id="goalListener60">0</span> دقيقة)</p>
-                            <p><strong>خبير الاختبارات:</strong> أكمل 5 اختبارات (حاليًا: <span id="goalQuizzes5">0</span> اختبار)</p>
-                        </div>
-                    </div>
-                </div>
-
                 <div id="quizzes-content" class="content-section" style="display: none;">
                     <div class="card">
                         <h1>الاختبارات 📝</h1>
@@ -245,24 +200,6 @@
                     </div>
                 </div>
 
-                <div id="data-management-content" class="content-section" style="display: none;">
-                    <div class="card">
-                        <h1>إدارة البيانات 💾</h1>
-                        <p style="color: #666; margin-bottom: 20px;">يمكنك تصدير أو استيراد بياناتك للحفاظ عليها أو نقلها بين الأجهزة.</p>
-
-                        <h2>تصدير البيانات</h2>
-                        <button id="exportDataButton" style="background-color: #007bff;"><i class="fas fa-download"></i> تصدير جميع بياناتي</button>
-                        <p style="font-size: 0.9em; color: #888; margin-top: 10px;">سيتم تنزيل ملف JSON يحتوي على جميع تقدمك، كتبك، ملاحظاتك، وإنجازاتك.</p>
-
-                        <h2>استيراد البيانات</h2>
-                        <input type="file" id="importFileInput" accept=".json" style="display: none;">
-                        <button id="chooseImportFileButton" style="background-color: #28a745;"><i class="fas fa-upload"></i> اختر ملف البيانات للاستيراد</button>
-                        <p id="selectedImportFileName" style="margin-top: 10px;"></p>
-                        <button id="importDataButton" style="background-color: #ffc107; color: #333; display: none;"><i class="fas fa-file-import"></i> تأكيد استيراد البيانات</button>
-                        <p style="font-size: 0.9em; color: #888; margin-top: 10px;">**تحذير:** استيراد البيانات سيستبدل جميع بياناتك الحالية بالبيانات الموجودة في الملف!</p>
-                    </div>
-                </div>
-
             </main>
         </div>
     </div>
@@ -271,60 +208,7 @@
         <div id="modal-content">
             <button id="closeModal">&times;</button>
             <div id="modalBody">
-                <div id="pdfViewerContainer" style="width: 100%; height: 500px; position: relative;">
-                    <iframe id="pdfViewerFrame" style="width: 100%; height: 100%; border: none;"></iframe>
-                    <div id="highlightOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
                 </div>
-                <div id="annotationTools" style="margin-top: 10px; text-align: center; display: none;">
-                    <button id="highlightButton" style="background-color: #ffc107; color: #333; margin-right: 5px;">تمييز</button>
-                    <button id="addAnnotationButton" style="background-color: #007bff;">إضافة تعليق</button>
-                </div>
-                <textarea id="annotationInput" placeholder="اكتب تعليقك هنا..." style="width: calc(100% - 20px); height: 80px; margin-top: 10px; display: none;"></textarea>
-                <button id="saveAnnotationButton" style="display: none;">حفظ التعليق</button>
-                <div id="annotationsList" style="margin-top: 20px; text-align: right;">
-                    <h3>تعليقاتك:</h3>
-                    <ul id="activeAnnotationsList" style="list-style-type: none; padding: 0;"></ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js"></script>
-</body>
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مساعد المبرمج - تطبيق تتبع القراءة</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="sidebar">
-        <div class="logo">مساعد المبرمج</div>
-        <ul class="nav-links">
-            <li><a href="#" data-section="home">الرئيسية 🏠</a></li>
-            <li><a href="#" data-section="daily-schedule">الجدول اليومي 🗓️</a></li>
-            <li><a href="#" data-section="tracking">تتبع التقدم 📈</a></li>
-            <li><a href="#" data-section="tests">الاختبارات 📝</a></li>
-            <li><a href="#" data-section="notes">الملحوظات ✍️</a></li>
-        </ul>
-    </div>
-
-    <div class="main-content">
-        <header>
-            <h1>مرحبًا بك في مساعد المبرمج!</h1>
-        </header>
-        <div id="content-area">
-            <section id="home-section" class="content-section active">
-                <h2>الصفحة الرئيسية</h2>
-                <p>مرحبًا بك في تطبيق تتبع القراءة الخاص بك. هنا ستجد ملخصًا لتقدمك.</p>
-                <div class="progress-summary">
-                    <h3>ملخص التقدم:</h3>
-                    <p id="overall-progress">لم تبدأ بعد في تتبع أي كتاب.</p>
-                </div>
-            </section>
         </div>
     </div>
 
