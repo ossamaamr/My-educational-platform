@@ -1116,3 +1116,400 @@ tr:nth-child(even) {
     margin-top: 0;
     color: #007bff;
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const contentArea = document.getElementById('content-area');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const overallProgressDisplay = document.getElementById('overall-progress');
+
+    // Load saved data from localStorage
+    let dailySchedule = JSON.parse(localStorage.getItem('dailySchedule')) || {
+        'الأحد': '', 'الاثنين': '', 'الثلاثاء': '', 'الأربعاء': '', 'الخميس': '', 'الجمعة': '', 'السبت': ''
+    };
+    let books = JSON.parse(localStorage.getItem('books')) || []; // { name, totalPages, currentPage }
+    let tests = JSON.parse(localStorage.getItem('tests')) || []; // { bookName, questions: [{q, a}] }
+    let notes = localStorage.getItem('notes') || '';
+
+    // Function to save data to localStorage
+    function saveData() {
+        localStorage.setItem('dailySchedule', JSON.stringify(dailySchedule));
+        localStorage.setItem('books', JSON.stringify(books));
+        localStorage.setItem('tests', JSON.stringify(tests));
+        localStorage.setItem('notes', notes);
+        updateOverallProgress();
+    }
+
+    // Function to update overall progress on home page
+    function updateOverallProgress() {
+        if (books.length === 0) {
+            overallProgressDisplay.textContent = 'لم تبدأ بعد في تتبع أي كتاب.';
+            return;
+        }
+
+        let totalCompletedPages = 0;
+        let totalPossiblePages = 0;
+
+        books.forEach(book => {
+            totalCompletedPages += book.currentPage || 0;
+            totalPossiblePages += book.totalPages || 0;
+        });
+
+        if (totalPossiblePages === 0) {
+            overallProgressDisplay.textContent = 'أضف صفحات للكتب لتتبع التقدم الكلي.';
+        } else {
+            const percentage = (totalCompletedPages / totalPossiblePages) * 100;
+            overallProgressDisplay.textContent = `لقد أنهيت ${totalCompletedPages} صفحة من أصل ${totalPossiblePages} صفحة إجمالاً. (${percentage.toFixed(2)}%)`;
+        }
+    }
+
+
+    // Function to render sections
+    function renderSection(sectionId) {
+        // Remove active class from all sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        // Remove active class from all nav links
+        navLinks.forEach(link => link.classList.remove('active'));
+
+        // Add active class to current section and nav link
+        const currentSectionElement = document.getElementById(`${sectionId}-section`);
+        if (currentSectionElement) {
+            currentSectionElement.classList.add('active');
+        }
+        document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+
+
+        // Render content based on section
+        switch (sectionId) {
+            case 'home':
+                // Content is static HTML, just update progress
+                updateOverallProgress();
+                break;
+            case 'daily-schedule':
+                renderDailySchedule();
+                break;
+            case 'tracking':
+                renderTrackingProgress();
+                break;
+            case 'tests':
+                renderTests();
+                break;
+            case 'notes':
+                renderNotes();
+                break;
+        }
+    }
+
+    // Event listener for navigation links
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = e.target.dataset.section;
+            renderSection(sectionId);
+        });
+    });
+
+    // --- Daily Schedule Section ---
+    function renderDailySchedule() {
+        let dailyScheduleHTML = `
+            <section id="daily-schedule-section" class="content-section">
+                <h2>الجدول اليومي 🗓️</h2>
+                <p>قم بتخطيط ما ستقرأه لكل يوم.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اليوم</th>
+                            <th>ما سأقرأه</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </section>
+        `;
+        contentArea.innerHTML = dailyScheduleHTML;
+
+        const tbody = document.querySelector('#daily-schedule-section tbody');
+        const daysOrder = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+        daysOrder.forEach(day => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${day}</td>
+                <td>
+                    <textarea id="schedule-${day}" placeholder="اكتب هنا ما ستقرأه يوم ${day}"></textarea>
+                </td>
+            `;
+            tbody.appendChild(tr);
+
+            // Populate with saved data
+            const textarea = document.getElementById(`schedule-${day}`);
+            textarea.value = dailySchedule[day];
+
+            // Add event listener for real-time saving
+            textarea.addEventListener('input', (e) => {
+                dailySchedule[day] = e.target.value;
+                saveData();
+            });
+        });
+    }
+
+    // --- Tracking Progress Section ---
+    function renderTrackingProgress() {
+        let trackingHTML = `
+            <section id="tracking-section" class="content-section">
+                <h2>تتبع التقدم 📈</h2>
+                <p>أضف كتبك وتتبع تقدمك في القراءة.</p>
+                <h3>أضف كتاب جديد:</h3>
+                <label for="newBookName">اسم الكتاب:</label>
+                <input type="text" id="newBookName" placeholder="مثال: نظرية كل شيء">
+                <label for="newBookTotalPages">عدد صفحات الكتاب الإجمالي:</label>
+                <input type="number" id="newBookTotalPages" min="1" placeholder="مثال: 300">
+                <button onclick="addBook()">أضف الكتاب</button>
+
+                <hr>
+
+                <h3>الكتب التي تتبعها:</h3>
+                <div id="booksList">
+                    </div>
+            </section>
+        `;
+        contentArea.innerHTML = trackingHTML;
+        loadBooksForTracking();
+    }
+
+    window.addBook = function() {
+        const nameInput = document.getElementById('newBookName');
+        const totalPagesInput = document.getElementById('newBookTotalPages');
+        const name = nameInput.value.trim();
+        const totalPages = parseInt(totalPagesInput.value);
+
+        if (name && totalPages > 0) {
+            books.push({ name: name, totalPages: totalPages, currentPage: 0 });
+            saveData();
+            nameInput.value = '';
+            totalPagesInput.value = '';
+            loadBooksForTracking();
+        } else {
+            alert('الرجاء إدخال اسم كتاب صحيح وعدد صفحات أكبر من صفر.');
+        }
+    }
+
+    function loadBooksForTracking() {
+        const booksListDiv = document.getElementById('booksList');
+        booksListDiv.innerHTML = ''; // Clear previous list
+
+        if (books.length === 0) {
+            booksListDiv.innerHTML = '<p>لم تقم بإضافة أي كتب بعد.</p>';
+            return;
+        }
+
+        books.forEach((book, index) => {
+            const bookItem = document.createElement('div');
+            bookItem.classList.add('book-list-item');
+            bookItem.innerHTML = `
+                <span>${book.name} (إجمالي: ${book.totalPages} صفحة)</span>
+                <div>
+                    <label for="current-page-${index}">وصلت لصفحة:</label>
+                    <input type="number" id="current-page-${index}" min="0" max="${book.totalPages}" value="${book.currentPage || 0}">
+                    <span id="progress-percent-${index}"></span>
+                </div>
+            `;
+            booksListDiv.appendChild(bookItem);
+
+            const currentPageInput = document.getElementById(`current-page-${index}`);
+            const progressPercentSpan = document.getElementById(`progress-percent-${index}`);
+
+            // Initial calculation
+            updateBookProgress(book, currentPageInput, progressPercentSpan);
+
+            currentPageInput.addEventListener('input', (e) => {
+                let newPage = parseInt(e.target.value);
+                if (isNaN(newPage) || newPage < 0) newPage = 0;
+                if (newPage > book.totalPages) newPage = book.totalPages;
+
+                books[index].currentPage = newPage;
+                saveData();
+                updateBookProgress(book, currentPageInput, progressPercentSpan);
+            });
+        });
+    }
+
+    function updateBookProgress(book, inputElement, percentElement) {
+        const progress = (book.currentPage / book.totalPages) * 100;
+        percentElement.textContent = `${progress.toFixed(2)}%`;
+        inputElement.value = book.currentPage; // Ensure input reflects clamped value
+    }
+
+    // --- Tests Section ---
+    function renderTests() {
+        let testsHTML = `
+            <section id="tests-section" class="content-section">
+                <h2>الاختبارات 📝</h2>
+                <p>أضف أسئلة وأجوبة لكل كتاب لتساعدك على المراجعة.</p>
+
+                <h3>اختر كتاب لإضافة أسئلة/أجوبة:</h3>
+                <select id="testBookSelect">
+                    <option value="">-- اختر كتاباً --</option>
+                    ${books.map(book => `<option value="${book.name}">${book.name}</option>`).join('')}
+                </select>
+                <button onclick="addBookToTest()">أضف كتاب للاختبار</button>
+
+                <div id="testArea" style="display: none; margin-top: 20px;">
+                    <h3 id="currentTestBookName"></h3>
+                    <div id="questionsList">
+                        </div>
+                    <h4>أضف سؤال جديد:</h4>
+                    <label for="newQuestion">السؤال:</label>
+                    <input type="text" id="newQuestion" placeholder="اكتب سؤالك هنا">
+                    <label for="newAnswer">الجواب:</label>
+                    <textarea id="newAnswer" placeholder="اكتب الجواب هنا"></textarea>
+                    <button onclick="addQuestionAnswer()">أضف سؤال وجواب</button>
+                </div>
+
+                <hr>
+
+                <h3>الاختبارات المضافة:</h3>
+                <div id="addedTestsList">
+                    </div>
+            </section>
+        `;
+        contentArea.innerHTML = testsHTML;
+        loadTestsSummary();
+    }
+
+    window.addBookToTest = function() {
+        const select = document.getElementById('testBookSelect');
+        const selectedBookName = select.value;
+        const testArea = document.getElementById('testArea');
+        const currentTestBookName = document.getElementById('currentTestBookName');
+
+        if (selectedBookName) {
+            currentTestBookName.textContent = `أسئلة وأجوبة لكتاب: ${selectedBookName}`;
+            testArea.style.display = 'block';
+            loadQuestionsForBook(selectedBookName); // Load existing questions for selected book
+        } else {
+            testArea.style.display = 'none';
+        }
+    }
+
+    window.addQuestionAnswer = function() {
+        const selectedBookName = document.getElementById('testBookSelect').value;
+        const questionInput = document.getElementById('newQuestion');
+        const answerInput = document.getElementById('newAnswer');
+        const question = questionInput.value.trim();
+        const answer = answerInput.value.trim();
+
+        if (selectedBookName && question && answer) {
+            let bookTest = tests.find(t => t.bookName === selectedBookName);
+            if (!bookTest) {
+                bookTest = { bookName: selectedBookName, questions: [] };
+                tests.push(bookTest);
+            }
+            bookTest.questions.push({ q: question, a: answer });
+            saveData();
+            questionInput.value = '';
+            answerInput.value = '';
+            loadQuestionsForBook(selectedBookName);
+            loadTestsSummary(); // Update summary after adding
+        } else {
+            alert('الرجاء اختيار كتاب وكتابة سؤال وجواب.');
+        }
+    }
+
+    function loadQuestionsForBook(bookName) {
+        const questionsListDiv = document.getElementById('questionsList');
+        questionsListDiv.innerHTML = '';
+        const bookTest = tests.find(t => t.bookName === bookName);
+
+        if (bookTest && bookTest.questions.length > 0) {
+            bookTest.questions.forEach((qa, index) => {
+                const qaItem = document.createElement('div');
+                qaItem.classList.add('question-answer-item');
+                qaItem.innerHTML = `
+                    <h4>سؤال ${index + 1}:</h4>
+                    <p><strong>السؤال:</strong> ${qa.q}</p>
+                    <p><strong>الجواب:</strong> ${qa.a}</p>
+                    <button onclick="deleteQuestion(${tests.indexOf(bookTest)}, ${index})">حذف</button>
+                `;
+                questionsListDiv.appendChild(qaItem);
+            });
+        } else {
+            questionsListDiv.innerHTML = '<p>لا توجد أسئلة أو أجوبة مضافة لهذا الكتاب بعد.</p>';
+        }
+    }
+
+    window.deleteQuestion = function(bookTestIndex, questionIndex) {
+        if (confirm('هل أنت متأكد من حذف هذا السؤال؟')) {
+            const selectedBookName = document.getElementById('testBookSelect').value;
+            tests[bookTestIndex].questions.splice(questionIndex, 1);
+            if (tests[bookTestIndex].questions.length === 0) {
+                tests.splice(bookTestIndex, 1); // Remove book if no questions left
+            }
+            saveData();
+            loadQuestionsForBook(selectedBookName); // Reload current book's questions
+            loadTestsSummary(); // Update summary
+        }
+    }
+
+    function loadTestsSummary() {
+        const addedTestsListDiv = document.getElementById('addedTestsList');
+        addedTestsListDiv.innerHTML = '';
+
+        if (tests.length === 0) {
+            addedTestsListDiv.innerHTML = '<p>لم تتم إضافة أي اختبارات للكتب بعد.</p>';
+            return;
+        }
+
+        tests.forEach(bookTest => {
+            const summaryItem = document.createElement('div');
+            summaryItem.classList.add('book-list-item');
+            summaryItem.style.flexDirection = 'column';
+            summaryItem.style.alignItems = 'flex-start';
+            summaryItem.innerHTML = `
+                <h4>${bookTest.bookName}</h4>
+                <p>عدد الأسئلة: ${bookTest.questions.length}</p>
+                <button onclick="viewBookQuestions('${bookTest.bookName}')">عرض/تعديل الأسئلة</button>
+            `;
+            addedTestsListDiv.appendChild(summaryItem);
+        });
+    }
+
+    window.viewBookQuestions = function(bookName) {
+        const select = document.getElementById('testBookSelect');
+        select.value = bookName; // Set selected book in dropdown
+        window.addBookToTest(); // Trigger function to display its questions
+    }
+
+
+    // --- Notes Section ---
+    function renderNotes() {
+        let notesHTML = `
+            <section id="notes-section" class="content-section">
+                <h2>الملحوظات ✍️</h2>
+                <p>اكتب ملاحظاتك بحرية هنا.</p>
+                <textarea id="notesArea" placeholder="اكتب ملاحظاتك..."></textarea>
+                <button onclick="saveNotes()">حفظ الملحوظات</button>
+            </section>
+        `;
+        contentArea.innerHTML = notesHTML;
+        const notesTextArea = document.getElementById('notesArea');
+        notesTextArea.value = notes; // Load saved notes
+
+        // Auto-save on input
+        notesTextArea.addEventListener('input', (e) => {
+            notes = e.target.value;
+            saveData(); // Save automatically as user types
+        });
+    }
+
+    window.saveNotes = function() {
+        // Notes are already saved on input, this button just gives a confirmation feeling
+        alert('تم حفظ الملحوظات!');
+    }
+
+
+    // Initialize the application: render home section by default
+    renderSection('home');
+    updateOverallProgress(); // Ensure initial progress is shown
+});
