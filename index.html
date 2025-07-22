@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصتي التعليمية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="welcome-screen">
+        <div>
+            <h1>أهلاً بك في منصتك التعليمية!</h1>
+            <p>نرجو إدخال اسمك لنبدأ رحلتك التعليمية:</p>
+            <input type="text" id="userNameInput" placeholder="أدخل اسمك هنا...">
+            <button id="startButton">ابدأ الآن</button>
+        </div>
+    </div>
+
+    <div id="dashboard" style="display: none;">
+        <header>
+            <div>
+                <h1>منصتي التعليمية</h1>
+            </div>
+            <p>مرحبًا يا <strong id="displayedUserName"></strong> 👋</p>
+        </header>
+
+        <div class="dashboard-content-area">
+            <aside>
+                <h2>ملخص التقدم</h2>
+                <div class="progress-circle">
+                    <span id="progressPercentage">0%</span>
+                </div>
+                <p>نسبة إنجازك الكلية</p>
+                <ul>
+                    <li class="sidebar-item active" data-content="main-dashboard-content">الرئيسية</li>
+                    <li class="sidebar-item" data-content="manage-book-content">إدارة الكتب النصية</li>
+                    <li class="sidebar-item" data-content="my-books-content">قائمة كتبي النصية</li>
+                    <li class="sidebar-item" data-content="audio-books-content">الكتب الصوتية</li>
+                    <li class="sidebar-item" data-content="daily-schedule-content">الجدول اليومي</li>
+                    <li class="sidebar-item" data-content="progress-tracking-content">تتبع التقدم</li>
+                    <li class="sidebar-item" data-content="quizzes-content">الاختبارات</li>
+                    <li class="sidebar-item" data-content="notes-content">ملحوظاتي</li>
+                    <li class="sidebar-item">المجتمع</li>
+                </ul>
+            </aside>
+
+            <main>
+                <div id="main-dashboard-content" class="content-section">
+                    <div class="main-buttons-grid">
+                        <button class="main-action-button" id="goToLessonsButton">
+                            <i class="fas fa-book-open"></i>
+                            <span>اذهب للدروس</span>
+                        </button>
+                        <button class="main-action-button" id="listenToExplanationButton">
+                            <i class="fas fa-headphones-alt"></i>
+                            <span>استمع للشرح</span>
+                        </button>
+                        <button class="main-action-button" id="takeQuizButton">
+                            <i class="fas fa-clipboard-question"></i>
+                            <span>اختبر نفسك</span>
+                        </button>
+                        <button class="main-action-button" id="goToNotesButton">
+                            <i class="fas fa-clipboard"></i>
+                            <span>ملحوظاتي</span>
+                        </button>
+                    </div>
+
+                    <div id="quick-access-info" class="card" style="margin-top: 40px; text-align: center;">
+                        <h2 style="color: #007bff; font-size: 1.8em;">مرحباً بعودتك!</h2>
+                        <p id="mainPageStatus">اختر زرًا من الأعلى لتبدأ أو تابع تقدمك.</p>
+                        <div id="main-page-selected-book-info" style="margin-top: 20px; display: none;">
+                            <h3>الكتاب الرئيسي الحالي: <span id="currentMainBookNameDisplay" style="color:#28a745;"></span></h3>
+                            <button id="viewCurrentMainBookButton" style="display:none;">عرض الكتاب</button>
+                            <button id="playCurrentMainAudioButton" style="margin-right: 10px; display:none;"><i class="fas fa-play"></i> تشغيل الصوت</button>
+                            <audio id="currentMainAudioPlayer" controls style="width: 80%; margin-top: 15px; display:none;"></audio>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="lessons-content" class="content-section" style="display: none;">
+                    <div class="card">
+                        <h1>دروسك المتاحة 📚🎧</h1>
+                        <p>اختر بين كتبك النصية والصوتية.</p>
+                        <div id="lesson-books-display">
+                            <h3>كتبك النصية:</h3>
+                            <div id="lessonTextBooksList" class="books-grid">
+                                <p id="noLessonTextBooksMessage">لا توجد كتب نصية بعد. قم بإضافتها من "إدارة الكتب النصية".</p>
+                            </div>
+                            <h3>كتبك الصوتية:</h3>
+                            <div id="lessonAudioBooksList" class="books-grid">
+                                <p id="noLessonAudioBooksMessage">لا توجد كتب صوتية بعد. قم بإضافتها من "الكتب الصوتية".</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="manage-book-content" class="content-section" style="display: none;">
+                    <div class="card">
+                        <h1>إدارة كتابك الدراسي الأساسي 📚</h1>
+                        <p>هنا يمكنك رفع كتاب نصي جديد. يمكنك تعيين أي كتاب ككتاب رئيسي من صفحة "قائمة كتبي النصية".</p>
+
+                        <div id="currentBookDisplay" style="display: none;">
+                            <div>
+                                <h3>الكتاب النصي المعين ككتاب رئيسي:</h3>
+                                <p id="currentBookName"></p>
+                            </div>
+                            <button id="removeMainBookButton">إزالة من الواجهة الرئيسية</button>
+                        </div>
+
+                        <div id="uploadForm" style="margin-top: 20px;">
+                            <input type="file" id="bookFileInput" accept=".pdf" style="display: none;">
+                            <button id="chooseFileButton">اختر كتاب PDF جديد</button>
+                            <p id="selectedFileName" style="margin-top: 10px;"></p>
+                            <button id="uploadBookButton" style="display: none;">تأكيد رفع الكتاب النصي</button>
+                        </div>
+
+                        <p class="note">
+                            **ملاحظة هامة:** في هذا النموذج، يتم عرض اسم الملف فقط. لرفع الملف فعليًا وتخزينه، ستحتاج إلى خادم (Backend).
+                            الصفحات الافتراضية لكل كتاب 100 صفحة.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="my-books-content" class="content-section" style="display: none;">
+                    <div class="card">
+                        <h1>قائمة كتبي النصية 📚</h1>
+                        <p style="color: #666; margin-bottom: 20px;">اختر كتابًا لتعيينه ككتاب رئيسي يظهر في الواجهة الرئيسية، أو قم بإدارة كتبك.</p>
+                        <div id="booksList" class="books-grid">
+                            <p id="noBooksMessage">لا توجد كتب نصية حالياً. قم برفع كتابك الأول من "إدارة الكتب النصية"!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="audio-books-content" class="content-section" style="display: none;">
+                    <div class="card">
+                        <h1>الكتب الصوتية 🎧</h1>
+                        <p>هنا يمكنك رفع كتاب صوتي (MP3) أو مرئي (MP4) جديد. يمكنك تعيين أي ملف كملف رئيسي يظهر في الواجهة الرئيسية.</p>
+
+                        <div id="currentAudioBookDisplay" style="display: none;">
+                            <div>
+                                <h3>الكتاب الصوتي المعين ككتاب رئيسي:</h3>
+                                <p id="currentAudioBookNameSecondary"></p>
+                            </div>
+                            <button id="removeMainAudioBookButton">إزالة من الواجهة الرئيسية</button>
+                        </div>
+
+                        <div id="audioUploadForm" style="margin-top: 20px;">
+                            <input type="file" id="audioFileInput" accept=".mp3, .mp4" style="display: none;">
+                            <button id="chooseAudioFileButton">اختر ملف صوتي أو مرئي جديد</button>
+                            <p id="selectedAudioFileName" style="margin-top: 10px;"></p>
+                            <button id="uploadAudioBookButton" style="display: none;">تأكيد رفع الملف</button>
+                        </div>
+
+                        <div id="audioBooksList" class="books-grid" style="margin-top: 30px;">
+                            <p id="noAudioBooksMessage">لا توجد كتب صوتية حالياً. قم برفع ملفك الأول!</p>
+                        </div>
+                        <p class="note">
+                            **ملاحظة هامة:** عرض ملفات الصوت/الفيديو مباشرة في المتصفح يتم عبر رابط مؤقت. في تطبيق حقيقي، يجب رفع الملفات إلى خادم.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="daily-schedule-content" class="content-section" style="display: none;">
+                    <div class="card">
+                        <h1>الجدول اليومي 🗓️</h1>
+                        <p style="color: #666; margin-bottom: 20px;">اكتب ما تخطط لقراءته أو إنجازه لكل يوم.</p>
+                        <div class="daily-schedule-grid">
+                            <h3>اليوم</h3>
+                            <h3>ما سأقرأه / أنجزه</h3>
+                            </div>
+                        <button id="saveDailyScheduleButton" style="margin-top: 20px;">حفظ الجدول</button>
+                    </div>
+                </div>
+
+                <div id="progress-tracking-content" class="content-section" style="display: none;">
+                    <div class="card">
+                        <h1>تتبع التقدم 📈</h1>
+                        <div id="progressBooksList">
+                            <p id="noProgressBooksMessage">لم تضف أي كتب نصية لتتبع تقدمك. يرجى إضافتها من "إدارة الكتب النصية".</p>
+                            </div>
+                    </div>
+                </div>
+
+                <div id="quizzes-content" class="content-section" style="display: none;">
+                    <div class="card">
+                        <h1>الاختبارات 📝</h1>
+                        <div id="quizzesBooksList">
+                            <p id="noQuizzesBooksMessage">لم تضف أي كتب نصية لإعداد اختبارات لها. يرجى إضافتها من "إدارة الكتب النصية".</p>
+                            </div>
+                    </div>
+                </div>
+
+                <div id="notes-content" class="content-section" style="display: none;">
+                    <div class="card">
+                        <h1>ملحوظاتي ✏️</h1>
+                        <textarea id="notesArea" placeholder="اكتب ملاحظاتك هنا بحرية..."></textarea>
+                        <button id="saveNotesButton">حفظ الملاحظات</button>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <div id="modal-overlay">
+        <div id="modal-content">
+            <button id="closeModal">&times;</button>
+            <div id="modalBody">
+                </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
